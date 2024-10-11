@@ -1781,10 +1781,9 @@ static void add_argv(const char* what) {
 
 static void load_rcfiles()
 {
-    char* rcpath = getenv("BOX64_RCFILE");
-
-    if(rcpath && FileExist(rcpath, IS_FILE))
-    LoadRCFile(rcpath);
+    char* p = getenv("BOX64_RCFILE");
+    if(p && FileExist(p, IS_FILE))
+	LoadRCFile(p);
     #ifndef TERMUX
     else if(FileExist("/etc/box64.box64rc", IS_FILE))
         LoadRCFile("/etc/box64.box64rc");
@@ -1797,7 +1796,7 @@ static void load_rcfiles()
     else
         LoadRCFile(NULL);   // load default rcfile
 
-    char* p = getenv("HOME");
+    p = getenv("HOME");
     if(p) {
         char tmp[4096];
         strncpy(tmp, p, 4095);
