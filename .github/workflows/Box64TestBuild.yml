@@ -1,0 +1,55 @@
+name: Build Box64
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install pacman
+      run: |
+        sudo apt update
+        sudo apt install -y pacman
+
+    - name: Initialize pacman keyring
+      run: |
+        sudo pacman-key --init
+        sudo pacman-key --populate archlinux
+
+    - name: Install dependencies
+      run: |
+        sudo pacman -Sy --noconfirm
+        sudo pacman -S --noconfirm glibc git cmake make
+
+    - name: Clone Box64 repo
+      run: |
+        git clone https://github.com/MarkZingrim/box64
+        cd box64
+
+    - name: Apply patch
+      run: |
+        patch -p1 < ../patches/box64-setdirs.patch
+
+    - name: Build Box64
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo -DARM_DYNAREC=ON -DBAD_SIGNAL=ON
+        make
+
+    - name: Upload Box64 Binary
+      uses: actions/upload-artifact@v3
+      with:
+        name: box64-binary
+        path: build/box64
+        
